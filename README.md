@@ -1,2 +1,3 @@
 # InsuranceApp
-app in course of laba test automation
+app in course of laba test automation 
+to learn
