@@ -1,9 +1,12 @@
 package com.insurance;
 
 import com.insurance.classes.*;
+import com.insurance.interfaces.Acceptable;
 import com.insurance.interfaces.IMakeContract;
 import com.insurance.exceptions.NotValidOptionException;
 import com.insurance.exceptions.PersonNotAccepetedException;
+import com.insurance.interfaces.ISign;
+import com.insurance.interfaces.Printable;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -12,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Main {
 
@@ -63,6 +67,8 @@ public class Main {
         tooExpensiveToInsure.add(vehicule1);
         tooExpensiveToInsure.add(vehicule2);
         tooExpensiveToInsure.add(vehicule3);
+
+        List<String> carBanned = tooExpensiveToInsure.stream().map(car->car.getMark()).collect(Collectors.toList());
 
 
 
@@ -127,7 +133,8 @@ public class Main {
 
 
         CalculateCost calculateCost = new CalculateCost();
-        boolean isAccepted = calculateCost.isAceceptable(user);
+         Acceptable acceptableLabmda = userLambda -> userLambda.getAge()<65;
+         boolean isAccepted = acceptableLabmda.isAceceptable(user);
         if(isAccepted){
             LOGGER.info("you are accepted");
         }else {
@@ -153,8 +160,10 @@ public class Main {
         bill.setInsuranceCompany(insuranceCompanySelected);
         bill.setCost(cost);
         LOGGER.info("Save the bill in our database");
-        bill.signContract(user);
-        bill.print(bill);
+        ISign iSign = userToSign -> userToSign!=null;
+        iSign.signContract(user);
+        Printable billToPrint = bill1 -> System.out.println(bill1.getCost() + " and your company is "+ bill1.getInsuranceCompany());
+        billToPrint.print(bill);
         bill.sendMail(bill);
         IMakeContract contract = new MakeContractImpFactory();
         contract.makeContract(user,insuranceCompanySelected);
